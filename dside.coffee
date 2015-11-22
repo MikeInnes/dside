@@ -4,6 +4,8 @@ window.onload = ->
 isString = (x) -> x.constructor == String
 isArray = (x) -> x.constructor == Array
 
+Array.prototype.last = -> @[@.length-1]
+
 parseHTML = (x) ->
   if isString x
     div = document.createElement 'div'
@@ -96,6 +98,9 @@ class TableView
     @extendRight()
     @extendLower()
     @trim()
+    @reposition()
+
+  reposition: ->
     for row in @panels
       for p in row
         p.refreshPosition()
@@ -131,15 +136,22 @@ class TableView
 
   trim: ->
     # Top Row
-    while @panels.length > 1 &&
-        @offset.y > @panels[0][0].position.y + @panels[0][0].getSize().y
+    while @offset.y > @panels[0][0].position.y + @panels[0][0].getSize().y
       ps = @panels.shift()
       @rmPanel p for p in ps
     # Left Column
-    while @panels[0].length > 1 &&
-        @offset.x > @panels[0][0].position.x + @panels[0][0].getSize().x
+    while @offset.x > @panels[0][0].position.x + @panels[0][0].getSize().x
       for row in @panels
         p = row.shift()
+        @rmPanel p
+    # Bottom Row
+    while @offset.y + @size.y < @panels.last().last().position.y
+      ps = @panels.pop()
+      @rmPanel p for p in ps
+    # Right Column
+    while @offset.x + @size.x < @panels.last().last().position.x
+      for row in @panels
+        p = row.pop()
         @rmPanel p
 
   offset: x: 0, y: 0
