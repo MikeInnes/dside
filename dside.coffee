@@ -19,6 +19,32 @@ div = (xs...) ->
   d.appendChild parseHTML x for x in xs
   d
 
+class Matrix
+  data: []
+  constructor: (@data) ->
+
+  height: -> @data.length
+  width: -> @data[0]?.length || 0
+
+  get: (i, j) -> @data[i][j]
+  row: (i) -> @data[i]
+  col: (i) -> @data[i][j] for j in [1..@height()]
+
+  topLeft: -> @data[0][0]
+  bottomRight: -> @data.last().last()
+
+  pushRow: (row) -> @data.push(row)
+  pushCol: (col) -> @row(i).push(col[i]) for i in [0...@height()]
+  unshiftRow: (row) -> @data.unshift(row)
+  unshiftCol: (col) -> @row(i).unshift(col[i]) for i in [0...@height()]
+
+  popRow: -> @data.pop()
+  popCol: -> row.pop() for row in @data
+  shiftRow: -> @data.shift()
+  shiftCol: -> row.shift() for row in @data
+
+  forEach: (f) -> f(val) for val in row for row in @data
+
 class TablePanel
   constructor: (@table, @data, @range) ->
     @createView @range
@@ -66,9 +92,6 @@ class TableView
     @size = x: @view.clientWidth, y: @view.clientHeight
     @initPanels()
 
-  # 2D array of visible panels
-  panels: []
-
   # Pooling
   oldPanels: []
   rmPanel: (p) ->
@@ -90,7 +113,7 @@ class TableView
       left: 1
       bottom: @chunkHeight
       right: @chunkWidth
-    @panels.push [p]
+    @panels = new Matrix [[p]]
     @container.appendChild p.view
     @refreshPanels()
 
@@ -100,14 +123,11 @@ class TableView
     @trim()
     @reposition()
 
-  reposition: ->
-    for row in @panels
-      for p in row
-        p.refreshPosition()
+  reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
   extendRight: ->
     while @rightBound() < @size.x + 50
-      for row in @panels
+      for row in @panels.data
         last = row[row.length-1]
         p = @getPanel
           top: last.range.top
@@ -122,7 +142,7 @@ class TableView
   extendLower: ->
     while @lowerBound() < @size.y + 50
       row = []
-      for last in @panels[@panels.length-1]
+      for last in @panels.data[@panels.data.length-1]
         p = @getPanel
           top:    last.range.bottom + 1
           bottom: last.range.bottom + @chunkHeight
@@ -132,25 +152,25 @@ class TableView
           y: last.position.y + last.getSize().y
           x: last.position.x
         row.push p
-      @panels.push row
+      @panels.data.push row
 
   trim: ->
     # Top Row
-    while @offset.y > @panels[0][0].position.y + @panels[0][0].getSize().y
-      ps = @panels.shift()
+    while @offset.y > @panels.topLeft().position.y + @panels.data[0][0].getSize().y
+      ps = @panels.data.shift()
       @rmPanel p for p in ps
     # Left Column
-    while @offset.x > @panels[0][0].position.x + @panels[0][0].getSize().x
-      for row in @panels
+    while @offset.x > @panels.topLeft().position.x + @panels.data[0][0].getSize().x
+      for row in @panels.data
         p = row.shift()
         @rmPanel p
     # Bottom Row
-    while @offset.y + @size.y < @panels.last().last().position.y
-      ps = @panels.pop()
+    while @offset.y + @size.y < @panels.bottomRight().position.y
+      ps = @panels.data.pop()
       @rmPanel p for p in ps
     # Right Column
-    while @offset.x + @size.x < @panels.last().last().position.x
-      for row in @panels
+    while @offset.x + @size.x < @panels.bottomRight().position.x
+      for row in @panels.data
         p = row.pop()
         @rmPanel p
 
@@ -165,14 +185,14 @@ class TableView
   # Size calculations
 
   rightBound: ->
-    r = @panels[0][0].position.x - @offset.x
-    for p in @panels[0]
+    r = @panels.topLeft().position.x - @offset.x
+    for p in @panels.data[0]
       r += p.getSize().x
     r
 
   lowerBound: ->
-    r = @panels[0][0].position.y - @offset.y
-    for row in @panels
+    r = @panels.topLeft().position.y - @offset.y
+    for row in @panels.data
       r += row[0].getSize().y
     r
 
