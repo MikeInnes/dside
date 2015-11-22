@@ -90,7 +90,7 @@ class TableView
       left: 1
       bottom: @chunkHeight
       right: @chunkWidth
-    @panels[0].push [p]
+    @panels.push [p]
     @container.appendChild p.view
     @refreshPanels()
 
