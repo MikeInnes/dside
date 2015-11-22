@@ -9,7 +9,6 @@ body {
 	cursor: default;
 	overflow: scroll;
 	position: relative;
-	cursor: cell;
 	z-index: 0;
 }
 
@@ -32,6 +31,7 @@ body {
 	display: inline-block;
 	background: white;
 	overflow: hidden;
+	cursor: cell;
 }
 
 /*.cell:hover {
