@@ -143,11 +143,11 @@ class TableView
           y: last.position.y
           x: last.position.x + last.size.x
         row.push p
+    return
 
   extendLower: ->
     while @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
-      row = []
-      for last in @panels.data[@panels.data.length-1]
+      row = for last in @panels.data[@panels.data.length-1]
         p = @getPanel
           top:    last.range.bottom + 1
           bottom: last.range.bottom + @chunkHeight
@@ -156,8 +156,9 @@ class TableView
         p.setPosition
           y: last.position.y + last.size.y
           x: last.position.x
-        row.push p
-      @panels.data.push row
+        p
+      @panels.pushRow row
+    return
 
   trim: ->
     if @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
