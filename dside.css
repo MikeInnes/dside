@@ -7,9 +7,8 @@ body {
 	height: 100%;
 	-webkit-user-select: none;
 	cursor: default;
-	overflow: scroll;
+	overflow: hidden;
 	position: relative;
-	z-index: 0;
 }
 
 .table-panel {
