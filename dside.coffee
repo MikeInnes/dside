@@ -25,6 +25,7 @@ class Matrix
 
   height: -> @data.length
   width: -> @data[0]?.length || 0
+  length: -> @width() * @height()
 
   get: (i, j) -> @data[i][j]
   row: (i) -> @data[i]
@@ -77,9 +78,6 @@ class TablePanel
     @view.style.transform = "translate3d(#{@position.x-@table.offset.x}px,
                                          #{@position.y-@table.offset.y}px,0)"
 
-  getSize: ->
-    @size ?= {y: @view.clientHeight, x: @view.clientWidth}
-
 class TableView
   chunkWidth: 8
   chunkHeight: 8
@@ -101,6 +99,8 @@ class TableView
     if @oldPanels.length == 0
       p = new TablePanel @, basicTable, range
       @view.appendChild p.view
+      # TODO: variable cell sizes
+      p.size = x: p.view.clientWidth, y: p.view.clientHeight
       p
     else
       p = @oldPanels.shift()
@@ -126,7 +126,7 @@ class TableView
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
   extendRight: ->
-    while @rightBound() < @size.x + 50
+    while @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
       for row in @panels.data
         last = row[row.length-1]
         p = @getPanel
@@ -136,11 +136,11 @@ class TableView
           right: last.range.right + @chunkWidth
         p.setPosition
           y: last.position.y
-          x: last.position.x + last.getSize().x
+          x: last.position.x + last.size.x
         row.push p
 
   extendLower: ->
-    while @lowerBound() < @size.y + 50
+    while @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
       row = []
       for last in @panels.data[@panels.data.length-1]
         p = @getPanel
@@ -149,18 +149,18 @@ class TableView
           left:   last.range.left
           right:  last.range.right
         p.setPosition
-          y: last.position.y + last.getSize().y
+          y: last.position.y + last.size.y
           x: last.position.x
         row.push p
       @panels.data.push row
 
   trim: ->
     # Top Row
-    while @offset.y > @panels.topLeft().position.y + @panels.data[0][0].getSize().y
+    while @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
       ps = @panels.data.shift()
       @rmPanel p for p in ps
     # Left Column
-    while @offset.x > @panels.topLeft().position.x + @panels.data[0][0].getSize().x
+    while @offset.x > @panels.topLeft().position.x + @panels.topLeft().size.x
       for row in @panels.data
         p = row.shift()
         @rmPanel p
@@ -179,22 +179,9 @@ class TableView
     e.preventDefault()
     @offset.x += e.deltaX
     @offset.y += e.deltaY
-    # @size = x: @view.clientWidth, y: @view.clientHeight
     requestAnimationFrame => @refreshPanels()
 
   # Size calculations
-
-  rightBound: ->
-    r = @panels.topLeft().position.x - @offset.x
-    for p in @panels.data[0]
-      r += p.getSize().x
-    r
-
-  lowerBound: ->
-    r = @panels.topLeft().position.y - @offset.y
-    for row in @panels.data
-      r += row[0].getSize().y
-    r
 
 basicTable =
   getCell: (row, col) ->
