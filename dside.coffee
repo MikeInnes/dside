@@ -143,17 +143,6 @@ class TableView
     # @size = x: @view.clientWidth, y: @view.clientHeight
     requestAnimationFrame => @refreshPanels()
 
-  # resetOffset: ->
-  #   dx = @panels[0][0].position.x - @scrollOffset.x
-  #   dy = @panels[0][0].position.y - @scrollOffset.y
-  #   if dx < 0 then dx = 0
-  #   if dy < 0 then dy = 0
-  #   @view.scrollTop -= dx
-  #   @view.scrollLeft -= dy
-  #   for row in @panels
-  #     for p in row
-  #       p.setPosition x: p.position.x-dx, y: p.position.y-dy
-
   # Size calculations
 
   rightBound: ->
