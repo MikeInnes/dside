@@ -103,7 +103,7 @@ class TableView
   getPanel: (range) ->
     if @oldPanels.length == 0
       p = new TablePanel @, basicTable, range
-      @view.appendChild p.view
+      @container.appendChild p.view
       # TODO: variable cell sizes
       p.size = x: p.view.clientWidth, y: p.view.clientHeight
       p
@@ -119,7 +119,6 @@ class TableView
       bottom: @chunkHeight
       right: @chunkWidth
     @panels = new Matrix [[p]]
-    @container.appendChild p.view
     @refreshPanels()
 
   refreshPanels: ->
@@ -209,12 +208,25 @@ class TableView
       @rmPanel p for p in ps
     return
 
+  refreshZoom: ->
+    zoom = Math.exp @zoomFactor/1000
+    # TODO: keep cursor position
+    @container.style.transform = "scale(#{zoom})"
+    @zoom = zoom
+
+  zoomFactor: 0
+  zoom: 1
   offset: x: 0, y: 0
+
   scroll: (e) ->
     e.preventDefault()
-    @offset.x += e.deltaX
-    @offset.y += e.deltaY
-    requestAnimationFrame => @refreshPanels()
+    if e.ctrlKey
+      @zoomFactor += e.deltaY
+      requestAnimationFrame => @refreshZoom()
+    else
+      @offset.x += e.deltaX/@zoom
+      @offset.y += e.deltaY/@zoom
+      requestAnimationFrame => @refreshPanels()
 
   # Size calculations
 

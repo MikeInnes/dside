@@ -11,6 +11,10 @@ body {
 	position: relative;
 }
 
+.table-container {
+	transform-origin: 0;
+}
+
 .table-panel {
 	position: absolute;
 	white-space: nowrap;
