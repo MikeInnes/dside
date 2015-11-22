@@ -67,7 +67,7 @@ class TableView
     @initPanels()
 
   # 2D array of visible panels
-  panels: [[]]
+  panels: []
 
   # Pooling
   oldPanels: []
@@ -90,7 +90,7 @@ class TableView
       left: 1
       bottom: @chunkHeight
       right: @chunkWidth
-    @panels[0].push p
+    @panels[0].push [p]
     @container.appendChild p.view
     @refreshPanels()
 
