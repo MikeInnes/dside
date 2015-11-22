@@ -18,7 +18,7 @@ div = (xs...) ->
   d
 
 class TablePanel
-  constructor: (@table, @range) ->
+  constructor: (@table, @data, @range) ->
     @createView @range
     @refresh @range
 
@@ -33,7 +33,7 @@ class TablePanel
 
   refresh: (range) ->
     if range? then @range = range
-    data = @table.getChunk @range, @cellViews
+    data = @data.getChunk @range, @cellViews
     for row in [0...data.length]
       for col in [0...data[0].length]
         @cellViews[row][col].innerText = data[row][col]
@@ -43,9 +43,13 @@ class TablePanel
 
   setPosition: ({x, y}) ->
     @position = {x, y}
+    @refreshPosition()
+
+  refreshPosition: ->
     # @view.style.left = x
     # @view.style.top = y
-    @view.style.transform = "translate3d(#{x}px, #{y}px, 0)"
+    @view.style.transform = "translate3d(#{@position.x-@table.offset.x}px,
+                                         #{@position.y-@table.offset.y}px,0)"
 
   getSize: ->
     @size ?= {y: @view.clientHeight, x: @view.clientWidth}
@@ -68,16 +72,16 @@ class TableView
   # Pooling
   oldPanels: []
   rmPanel: (p) ->
-    # p.view.style.visibility = 'hidden'
+    p.view.style.visibility = 'hidden'
     @oldPanels.push(p)
   getPanel: (range) ->
     if @oldPanels.length == 0
-      p = new TablePanel basicTable, range
+      p = new TablePanel @, basicTable, range
       @view.appendChild p.view
       p
     else
       p = @oldPanels.shift()
-      # p.view.style.visibility = null
+      p.view.style.visibility = null
       p.refresh range
 
   initPanels: ->
@@ -94,6 +98,9 @@ class TableView
     @extendRight()
     @extendLower()
     @trim()
+    for row in @panels
+      for p in row
+        p.refreshPosition()
 
   extendRight: ->
     while @rightBound() < @size.x + 50
@@ -127,32 +134,34 @@ class TableView
   trim: ->
     # Top Row
     while @panels.length > 1 &&
-        @scrollOffset.y > @panels[0][0].position.y + @panels[0][0].getSize().y
+        @offset.y > @panels[0][0].position.y + @panels[0][0].getSize().y
       ps = @panels.shift()
       @rmPanel p for p in ps
     # Left Column
     while @panels[0].length > 1 &&
-        @scrollOffset.x > @panels[0][0].position.x + @panels[0][0].getSize().x
+        @offset.x > @panels[0][0].position.x + @panels[0][0].getSize().x
       for row in @panels
         p = row.shift()
         @rmPanel p
 
-  scrollOffset: x: 0, y: 0
+  offset: x: 0, y: 0
   scroll: (e) ->
-    @scrollOffset = x: @view.scrollLeft, y: @view.scrollTop
+    e.preventDefault()
+    @offset.x += e.deltaX
+    @offset.y += e.deltaY
     # @size = x: @view.clientWidth, y: @view.clientHeight
     requestAnimationFrame => @refreshPanels()
 
   # Size calculations
 
   rightBound: ->
-    r = @panels[0][0].position.x - @scrollOffset.x
+    r = @panels[0][0].position.x - @offset.x
     for p in @panels[0]
       r += p.getSize().x
     r
 
   lowerBound: ->
-    r = @panels[0][0].position.y - @scrollOffset.y
+    r = @panels[0][0].position.y - @offset.y
     for row in @panels
       r += row[0].getSize().y
     r
