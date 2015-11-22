@@ -123,12 +123,61 @@ class TableView
     @refreshPanels()
 
   refreshPanels: ->
-    @extendRight()
-    @extendLower()
+    @extend()
     @trim()
     @reposition()
 
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
+
+  extend: ->
+    @extendUpper()
+    @extendLeft()
+    @extendLower()
+    @extendRight()
+
+  extendUpper: ->
+    if @panels.topLeft().position.y > @offset.y - 50
+      row = for last in @panels.firstRow()
+        p = @getPanel
+          top:    last.range.top - @chunkHeight
+          bottom: last.range.top - 1
+          left:   last.range.left
+          right:  last.range.right
+        p.setPosition
+          x: last.position.x
+          y: last.position.y - p.size.y
+        p
+      @panels.unshiftRow row
+
+  extendLeft: ->
+    if @panels.topLeft().position.x > @offset.x - 50
+      col = for last in @panels.firstCol()
+        p = @getPanel
+          top: last.range.top
+          bottom: last.range.bottom
+          left: last.range.left - @chunkWidth
+          right: last.range.left - 1
+        p.setPosition
+          x: last.position.x - p.size.x
+          y: last.position.y
+        p
+      @panels.unshiftCol col
+    return
+
+  extendLower: ->
+    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
+      row = for last in @panels.lastRow()
+        p = @getPanel
+          top:    last.range.bottom + 1
+          bottom: last.range.bottom + @chunkHeight
+          left:   last.range.left
+          right:  last.range.right
+        p.setPosition
+          x: last.position.x
+          y: last.position.y + last.size.y
+        p
+      @panels.pushRow row
+    return
 
   extendRight: ->
     while @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
@@ -139,25 +188,10 @@ class TableView
           left: last.range.right + 1
           right: last.range.right + @chunkWidth
         p.setPosition
-          y: last.position.y
           x: last.position.x + last.size.x
+          y: last.position.y
         p
       @panels.pushCol col
-    return
-
-  extendLower: ->
-    while @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
-      row = for last in @panels.data[@panels.data.length-1]
-        p = @getPanel
-          top:    last.range.bottom + 1
-          bottom: last.range.bottom + @chunkHeight
-          left:   last.range.left
-          right:  last.range.right
-        p.setPosition
-          y: last.position.y + last.size.y
-          x: last.position.x
-        p
-      @panels.pushRow row
     return
 
   trim: ->
