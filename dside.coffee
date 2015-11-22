@@ -46,8 +46,6 @@ class TablePanel
     @refreshPosition()
 
   refreshPosition: ->
-    # @view.style.left = x
-    # @view.style.top = y
     @view.style.transform = "translate3d(#{@position.x-@table.offset.x}px,
                                          #{@position.y-@table.offset.y}px,0)"
 
