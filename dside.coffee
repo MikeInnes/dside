@@ -31,13 +31,18 @@ class Matrix
   row: (i) -> @data[i]
   col: (i) -> @data[i][j] for j in [1..@height()]
 
+  firstRow: -> @row 0
+  firstCol: -> @col 0
+  lastRow: -> @row @height()-1
+  lastCol: -> @col @height()-1
+
   topLeft: -> @data[0][0]
   bottomRight: -> @data.last().last()
 
   pushRow: (row) -> @data.push(row)
-  pushCol: (col) -> @row(i).push(col[i]) for i in [0...@height()]
-  unshiftRow: (row) -> @data.unshift(row)
-  unshiftCol: (col) -> @row(i).unshift(col[i]) for i in [0...@height()]
+  pushCol: (col) -> @row(i).push col[i] for i in [0...@height()]
+  unshiftRow: (row) -> @data.unshift row
+  unshiftCol: (col) -> @row(i).unshift col[i] for i in [0...@height()]
 
   popRow: -> @data.pop()
   popCol: -> row.pop() for row in @data
@@ -155,24 +160,19 @@ class TableView
       @panels.data.push row
 
   trim: ->
-    # Top Row
-    while @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
-      ps = @panels.data.shift()
+    if @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
+      ps = @panels.shiftRow()
       @rmPanel p for p in ps
-    # Left Column
-    while @offset.x > @panels.topLeft().position.x + @panels.topLeft().size.x
-      for row in @panels.data
-        p = row.shift()
-        @rmPanel p
-    # Bottom Row
-    while @offset.y + @size.y < @panels.bottomRight().position.y
-      ps = @panels.data.pop()
+    if @offset.x > @panels.topLeft().position.x + @panels.topLeft().size.x
+      ps = @panels.shiftCol()
       @rmPanel p for p in ps
-    # Right Column
-    while @offset.x + @size.x < @panels.bottomRight().position.x
-      for row in @panels.data
-        p = row.pop()
-        @rmPanel p
+    if @offset.y + @size.y < @panels.bottomRight().position.y
+      ps = @panels.popRow()
+      @rmPanel p for p in ps
+    if @offset.x + @size.x < @panels.bottomRight().position.x
+      ps = @panels.popCol()
+      @rmPanel p for p in ps
+    return
 
   offset: x: 0, y: 0
   scroll: (e) ->
