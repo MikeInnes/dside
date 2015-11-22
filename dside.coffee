@@ -29,12 +29,12 @@ class Matrix
 
   get: (i, j) -> @data[i][j]
   row: (i) -> @data[i]
-  col: (i) -> @data[i][j] for j in [1..@height()]
+  col: (j) -> @data[i][j] for i in [0...@height()]
 
   firstRow: -> @row 0
   firstCol: -> @col 0
   lastRow: -> @row @height()-1
-  lastCol: -> @col @height()-1
+  lastCol: -> @col @width()-1
 
   topLeft: -> @data[0][0]
   bottomRight: -> @data.last().last()
@@ -132,8 +132,7 @@ class TableView
 
   extendRight: ->
     while @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
-      for row in @panels.data
-        last = row[row.length-1]
+      col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
           bottom: last.range.bottom
@@ -142,7 +141,8 @@ class TableView
         p.setPosition
           y: last.position.y
           x: last.position.x + last.size.x
-        row.push p
+        p
+      @panels.pushCol col
     return
 
   extendLower: ->
