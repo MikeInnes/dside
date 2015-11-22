@@ -33,10 +33,10 @@ class TablePanel
 
   refresh: (range) ->
     if range? then @range = range
-    data = @data.getChunk @range, @cellViews
-    for row in [0...data.length]
-      for col in [0...data[0].length]
-        @cellViews[row][col].innerText = data[row][col]
+    for row in [0...@cellViews.length]
+      for col in [0...@cellViews[0].length]
+        @cellViews[row][col].innerText =
+          @data.getCell range.top+row, range.left + col
     @
 
   position: x: 0, y: 0
@@ -165,5 +165,5 @@ class TableView
     r
 
 basicTable =
-  getChunk: ({top, left, bottom, right}) ->
-    ("#{row}:#{col}" for col in [left..right]) for row in [top..bottom]
+  getCell: (row, col) ->
+    "#{row}:#{col}"
