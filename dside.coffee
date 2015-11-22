@@ -53,8 +53,8 @@ class TablePanel
     @size ?= {y: @view.clientHeight, x: @view.clientWidth}
 
 class TableView
-  chunkWidth: 2
-  chunkHeight: 2
+  chunkWidth: 8
+  chunkHeight: 8
 
   constructor: (@view) ->
     @container = document.createElement 'div'
