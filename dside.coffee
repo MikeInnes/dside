@@ -173,7 +173,7 @@ class TableView
       return false
 
   extendLower: ->
-    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
+    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y/@zoom + 50
       row = for last in @panels.lastRow()
         p = @getPanel
           top:    last.range.bottom + 1
@@ -190,7 +190,7 @@ class TableView
       return false
 
   extendRight: ->
-    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
+    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x/@zoom + 50
       col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
@@ -219,13 +219,13 @@ class TableView
     return
 
   trimLower: ->
-    if @offset.y + @size.y < @panels.bottomRight().position.y
+    if @offset.y + @size.y/@zoom < @panels.bottomRight().position.y
       ps = @panels.popRow()
       @rmPanel p for p in ps
     return
 
   trimRight: ->
-    if @offset.x + @size.x < @panels.bottomRight().position.x
+    if @offset.x + @size.x/@zoom < @panels.bottomRight().position.x
       ps = @panels.popCol()
       @rmPanel p for p in ps
     return
