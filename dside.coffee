@@ -246,7 +246,7 @@ class TableView
   scroll: (e) ->
     e.preventDefault()
     if e.ctrlKey
-      @zoomFactor += e.deltaY
+      @zoomFactor -= e.deltaY
       requestAnimationFrame => @refreshZoom()
     else
       @offset.x += e.deltaX/@zoom
