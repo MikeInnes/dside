@@ -6,6 +6,8 @@ isArray = (x) -> x.constructor == Array
 
 Array.prototype.last = -> @[@.length-1]
 
+callback = (t, f) -> setTimeout f, t
+
 parseHTML = (x) ->
   if isString x
     div = document.createElement 'div'
@@ -119,27 +121,22 @@ class TableView
       bottom: @chunkHeight
       right: @chunkWidth
     @panels = new Matrix [[p]]
-    @refreshPanels()
+    @panelCycle()
 
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
-  cycleLock: false
-  refreshPanels: ->
-    return if @cycleLock
-    @cycleLock = true
-    requestAnimationFrame =>
-      if @extendLower()
-        @trimUpper()
-      else if @extendUpper()
-        @trimLower()
-      @reposition()
-      requestAnimationFrame =>
-        if @extendLeft()
-          @trimRight()
-        else if @extendRight()
-          @trimLeft()
-        @reposition()
-        @cycleLock = false
+  panelCycle: ->
+    if @extendLower()
+      @trimUpper()
+    else if @extendUpper()
+      @trimLower()
+    callback 0.1, =>
+      if @extendLeft()
+        @trimRight()
+      else if @extendRight()
+        @trimLeft()
+      callback 0.1, =>
+        @panelCycle()
 
   extendUpper: ->
     if @panels.topLeft().position.y > @offset.y - 50
@@ -251,7 +248,7 @@ class TableView
     else
       @offset.x += e.deltaX/@zoom
       @offset.y += e.deltaY/@zoom
-      @refreshPanels()
+      requestAnimationFrame => @reposition()
 
 basicTable =
   getCell: (row, col) ->
