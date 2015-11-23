@@ -86,8 +86,7 @@ class TablePanel
                                          #{@position.y-@table.offset.y}px,0)"
 
 class TableView
-  chunkWidth: 8
-  chunkHeight: 8
+  chunkSize: x: 8, y: 8
 
   constructor: (@view) ->
     @container = document.createElement 'div'
@@ -118,8 +117,8 @@ class TableView
     p = @getPanel
       top: 1
       left: 1
-      bottom: @chunkHeight
-      right: @chunkWidth
+      bottom: @chunkSize.y
+      right: @chunkSize.x
     @panels = new Matrix [[p]]
     @panelCycle()
 
@@ -142,7 +141,7 @@ class TableView
     if @panels.topLeft().position.y > @offset.y - 50
       row = for last in @panels.firstRow()
         p = @getPanel
-          top:    last.range.top - @chunkHeight
+          top:    last.range.top - @chunkSize.y
           bottom: last.range.top - 1
           left:   last.range.left
           right:  last.range.right
@@ -161,7 +160,7 @@ class TableView
         p = @getPanel
           top: last.range.top
           bottom: last.range.bottom
-          left: last.range.left - @chunkWidth
+          left: last.range.left - @chunkSize.x
           right: last.range.left - 1
         p.setPosition
           x: last.position.x - p.size.x
@@ -177,7 +176,7 @@ class TableView
       row = for last in @panels.lastRow()
         p = @getPanel
           top:    last.range.bottom + 1
-          bottom: last.range.bottom + @chunkHeight
+          bottom: last.range.bottom + @chunkSize.y
           left:   last.range.left
           right:  last.range.right
         p.setPosition
@@ -196,7 +195,7 @@ class TableView
           top: last.range.top
           bottom: last.range.bottom
           left: last.range.right + 1
-          right: last.range.right + @chunkWidth
+          right: last.range.right + @chunkSize.x
         p.setPosition
           x: last.position.x + last.size.x
           y: last.position.y
