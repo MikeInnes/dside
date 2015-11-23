@@ -121,18 +121,25 @@ class TableView
     @panels = new Matrix [[p]]
     @refreshPanels()
 
-  refreshPanels: ->
-    @extend()
-    @trim()
-    @reposition()
-
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
-  extend: ->
-    @extendUpper()
-    @extendLeft()
-    @extendLower()
-    @extendRight()
+  cycleLock: false
+  refreshPanels: ->
+    return if @cycleLock
+    @cycleLock = true
+    requestAnimationFrame =>
+      if @extendUpper()
+        @trimLower()
+      else if @extendLower()
+        @trimUpper()
+      @reposition()
+      requestAnimationFrame =>
+        if @extendLeft()
+          @trimRight()
+        else if @extendRight()
+          @trimLeft()
+        @reposition()
+        @cycleLock = false
 
   extendUpper: ->
     if @panels.topLeft().position.y > @offset.y - 50
@@ -147,6 +154,9 @@ class TableView
           y: last.position.y - p.size.y
         p
       @panels.unshiftRow row
+      return true
+    else
+      return false
 
   extendLeft: ->
     if @panels.topLeft().position.x > @offset.x - 50
@@ -161,7 +171,9 @@ class TableView
           y: last.position.y
         p
       @panels.unshiftCol col
-    return
+      return true
+    else
+      return false
 
   extendLower: ->
     if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y + 50
@@ -176,10 +188,12 @@ class TableView
           y: last.position.y + last.size.y
         p
       @panels.pushRow row
-    return
+      return true
+    else
+      return false
 
   extendRight: ->
-    while @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
+    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x + 50
       col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
@@ -191,18 +205,29 @@ class TableView
           y: last.position.y
         p
       @panels.pushCol col
-    return
+      return true
+    else
+      return false
 
-  trim: ->
+  trimUpper: ->
     if @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
       ps = @panels.shiftRow()
       @rmPanel p for p in ps
+    return
+
+  trimLeft: ->
     if @offset.x > @panels.topLeft().position.x + @panels.topLeft().size.x
       ps = @panels.shiftCol()
       @rmPanel p for p in ps
+    return
+
+  trimLower: ->
     if @offset.y + @size.y < @panels.bottomRight().position.y
       ps = @panels.popRow()
       @rmPanel p for p in ps
+    return
+
+  trimRight: ->
     if @offset.x + @size.x < @panels.bottomRight().position.x
       ps = @panels.popCol()
       @rmPanel p for p in ps
@@ -226,9 +251,7 @@ class TableView
     else
       @offset.x += e.deltaX/@zoom
       @offset.y += e.deltaY/@zoom
-      requestAnimationFrame => @refreshPanels()
-
-  # Size calculations
+      @refreshPanels()
 
 basicTable =
   getCell: (row, col) ->
