@@ -128,10 +128,10 @@ class TableView
     return if @cycleLock
     @cycleLock = true
     requestAnimationFrame =>
-      if @extendUpper()
-        @trimLower()
-      else if @extendLower()
+      if @extendLower()
         @trimUpper()
+      else if @extendUpper()
+        @trimLower()
       @reposition()
       requestAnimationFrame =>
         if @extendLeft()
