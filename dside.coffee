@@ -1,5 +1,5 @@
 window.onload = ->
-  new GridView x for x in document.querySelectorAll ".table"
+  new GridView x, basicTable for x in document.querySelectorAll ".table"
 
 isString = (x) -> x.constructor == String
 isArray = (x) -> x.constructor == Array
@@ -88,13 +88,21 @@ class GridPanel
 class GridView
   chunkSize: x: 8, y: 8
 
-  constructor: (@view) ->
+  constructor: (@view, @data, isBackground) ->
+    if !isBackground
+      @background = document.createElement 'div'
+      @background.classList.add 'table-background'
+      @view.appendChild @background
+      new GridView @background, emptyTable, true
+
     @container = document.createElement 'div'
     @container.classList.add 'table-container'
     @view.appendChild @container
-    @view.addEventListener "mousewheel", (e) => @scroll e
     @size = x: @view.clientWidth, y: @view.clientHeight
     @initPanels()
+    if !isBackground
+      @view.addEventListener "mousewheel", (e) => @scroll e
+      @panelCycle()
 
   # Pooling
   oldPanels: []
@@ -103,7 +111,7 @@ class GridView
     @oldPanels.push(p)
   getPanel: (range) ->
     if @oldPanels.length == 0
-      p = new GridPanel @, basicTable, range
+      p = new GridPanel @, @data, range
       @container.appendChild p.view
       # TODO: variable cell sizes
       p.size = x: p.view.clientWidth, y: p.view.clientHeight
@@ -120,7 +128,10 @@ class GridView
       bottom: @chunkSize.y
       right: @chunkSize.x
     @panels = new Matrix [[p]]
-    @panelCycle()
+    while @extendRight()
+      true
+    while @extendLower()
+      true
 
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
@@ -254,3 +265,6 @@ class GridView
 basicTable =
   getCell: (row, col) ->
     "#{row}:#{col}"
+
+emptyTable =
+  getCell: -> ""
