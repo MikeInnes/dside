@@ -125,15 +125,9 @@ class GridView
   reposition: -> @panels.forEach (p) -> p.refreshPosition()
 
   panelCycle: ->
-    if @extendLower()
-      @trimUpper()
-    else if @extendUpper()
-      @trimLower()
+    @extendLower() || @extendUpper()
     callback 0.1, =>
-      if @extendLeft()
-        @trimRight()
-      else if @extendRight()
-        @trimLeft()
+      @extendLeft() or @extendRight()
       callback 0.1, =>
         @panelCycle()
 
@@ -141,6 +135,7 @@ class GridView
     panelBound = @panels.topLeft().position.y
     screenBound = @offset.y
     if panelBound > screenBound
+      @trimLower()
       row = for last in @panels.firstRow()
         p = @getPanel
           top:    last.range.top - @chunkSize.y
@@ -158,6 +153,7 @@ class GridView
     panelBound = @panels.topLeft().position.x
     screenBound = @offset.x
     if panelBound > screenBound
+      @trimRight()
       col = for last in @panels.firstCol()
         p = @getPanel
           top: last.range.top
@@ -177,6 +173,7 @@ class GridView
     screenBound = @offset.y + @size.y/@zoom
     n = Math.ceil (screenBound - panelBound)/panelHeight
     if n > 0
+      @trimUpper()
       row = for last in @panels.lastRow()
         p = @getPanel
           top:    last.range.bottom + 1
@@ -196,6 +193,7 @@ class GridView
     screenBound = @offset.x + @size.x/@zoom
     n = Math.ceil (screenBound - panelBound)/panelWidth
     if n > 0
+      @trimLeft()
       col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
