@@ -138,7 +138,9 @@ class GridView
         @panelCycle()
 
   extendUpper: ->
-    if @panels.topLeft().position.y > @offset.y
+    panelBound = @panels.topLeft().position.y
+    screenBound = @offset.y
+    if panelBound > screenBound
       row = for last in @panels.firstRow()
         p = @getPanel
           top:    last.range.top - @chunkSize.y
@@ -150,12 +152,12 @@ class GridView
           y: last.position.y - p.size.y
         p
       @panels.unshiftRow row
-      return true
-    else
-      return false
+    return panelBound < screenBound
 
   extendLeft: ->
-    if @panels.topLeft().position.x > @offset.x
+    panelBound = @panels.topLeft().position.x
+    screenBound = @offset.x
+    if panelBound > screenBound
       col = for last in @panels.firstCol()
         p = @getPanel
           top: last.range.top
@@ -167,12 +169,14 @@ class GridView
           y: last.position.y
         p
       @panels.unshiftCol col
-      return true
-    else
-      return false
+    return panelBound > screenBound
 
   extendLower: ->
-    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y/@zoom
+    panelHeight = @panels.bottomRight().size.y
+    panelBound = @panels.bottomRight().position.y + panelHeight
+    screenBound = @offset.y + @size.y/@zoom
+    n = Math.ceil (screenBound - panelBound)/panelHeight
+    if n > 0
       row = for last in @panels.lastRow()
         p = @getPanel
           top:    last.range.bottom + 1
@@ -184,12 +188,14 @@ class GridView
           y: last.position.y + last.size.y
         p
       @panels.pushRow row
-      return true
-    else
-      return false
+    return n > 0
 
   extendRight: ->
-    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x/@zoom
+    panelWidth = @panels.bottomRight().size.x
+    panelBound = @panels.bottomRight().position.x + panelWidth
+    screenBound = @offset.x + @size.x/@zoom
+    n = Math.ceil (screenBound - panelBound)/panelWidth
+    if n > 0
       col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
@@ -201,9 +207,7 @@ class GridView
           y: last.position.y
         p
       @panels.pushCol col
-      return true
-    else
-      return false
+    return n > 0
 
   trimUpper: ->
     if @offset.y > @panels.topLeft().position.y + @panels.topLeft().size.y
