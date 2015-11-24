@@ -138,7 +138,7 @@ class GridView
         @panelCycle()
 
   extendUpper: ->
-    if @panels.topLeft().position.y > @offset.y - 50
+    if @panels.topLeft().position.y > @offset.y
       row = for last in @panels.firstRow()
         p = @getPanel
           top:    last.range.top - @chunkSize.y
@@ -155,7 +155,7 @@ class GridView
       return false
 
   extendLeft: ->
-    if @panels.topLeft().position.x > @offset.x - 50
+    if @panels.topLeft().position.x > @offset.x
       col = for last in @panels.firstCol()
         p = @getPanel
           top: last.range.top
@@ -172,7 +172,7 @@ class GridView
       return false
 
   extendLower: ->
-    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y/@zoom + 50
+    if @panels.bottomRight().position.y + @panels.bottomRight().size.y < @offset.y + @size.y/@zoom
       row = for last in @panels.lastRow()
         p = @getPanel
           top:    last.range.bottom + 1
@@ -189,7 +189,7 @@ class GridView
       return false
 
   extendRight: ->
-    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x/@zoom + 50
+    if @panels.bottomRight().position.x + @panels.bottomRight().size.x < @offset.x + @size.x/@zoom
       col = for last in @panels.lastCol()
         p = @getPanel
           top: last.range.top
