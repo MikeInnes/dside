@@ -1,5 +1,5 @@
 window.onload = ->
-  new TableView x for x in document.querySelectorAll ".table"
+  new GridView x for x in document.querySelectorAll ".table"
 
 isString = (x) -> x.constructor == String
 isArray = (x) -> x.constructor == Array
@@ -53,7 +53,7 @@ class Matrix
 
   forEach: (f) -> f(val) for val in row for row in @data
 
-class TablePanel
+class GridPanel
   constructor: (@table, @data, @range) ->
     @createView @range
     @refresh @range
@@ -85,7 +85,7 @@ class TablePanel
     @view.style.transform = "translate3d(#{@position.x-@table.offset.x}px,
                                          #{@position.y-@table.offset.y}px,0)"
 
-class TableView
+class GridView
   chunkSize: x: 8, y: 8
 
   constructor: (@view) ->
@@ -103,7 +103,7 @@ class TableView
     @oldPanels.push(p)
   getPanel: (range) ->
     if @oldPanels.length == 0
-      p = new TablePanel @, basicTable, range
+      p = new GridPanel @, basicTable, range
       @container.appendChild p.view
       # TODO: variable cell sizes
       p.size = x: p.view.clientWidth, y: p.view.clientHeight
